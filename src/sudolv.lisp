@@ -17,23 +17,21 @@
       nil))
 
 (defun num-in-line (array num line)
-  (position-in-line array num 0 line))
-
-(defun position-in-line (array num row line)
-  (if (eql row 9)
-      nil
-      (if (num-in-cell-p array num row line)
-	  row
-	  (position-in-line array num (1+ row) line))))
+  (position-of-num array num 0 line 'line))
 
 (defun num-in-row (array num row)
-  (position-in-row array num row 0))
+  (position-of-num array num row 0 'row))
 
-(defun position-in-row (array num row line)
-  (if (eql line 9)
+(defun position-of-num (array num row line dir)
+  (if (or (> row 8) (> line 8))
       nil
       (if (num-in-cell-p array num row line)
-	  line
-	  (position-in-row array num row (1+ line)))))
+	  (cond ((eql dir 'line) row)
+		((eql dir 'row) line))
+	  (cond ((eql dir 'line)
+		 (position-of-num array num (1+ row) line dir))
+		((eql dir 'row)
+		 (position-of-num array num row (1+ line) dir))))))
+
       
 
