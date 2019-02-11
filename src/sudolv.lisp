@@ -4,10 +4,12 @@
     (progn
       (make-sudoku-array file-content)
       (replace-nils)
+      (init-possibilities)
       *sudoku*)))
 
 (defparameter *sudoku* nil "Sudoku array to work with")
 (defparameter *size* 0 "size of Sudoku")
+(defparameter *square-size* 0 "dimension of subsquare")
 
 (defun prompt-read ()
   (format *query-io* "sudoku file (full path) : ")
@@ -19,39 +21,77 @@
     (read stream)))
 
 (defun make-sudoku-array (sudoku-list)
-  (progn
+  (let* ((size (length sudoku-list))
+	(square-size (truncate (sqrt size))))
+    (setf *size* size)
+    (setf *square-size* square-size)
     (setf *sudoku*
-	  (make-array '(9 9)
-		      :initial-contents sudoku-list))
-    (setf *size* (length sudoku-list))))
+	  (make-array (list size size)
+		      :initial-contents sudoku-list))))
 
 (defun replace-nils ()
   (dotimes (x *size*)
     (dotimes (y *size*)
-      (when (null (aref *sudoku* y x))
-	(setf (aref *sudoku* y x) '(1 2 3 4 5 6 7 8 9))))))
+      (when (null (aref *sudoku* x y))
+	(setf (aref *sudoku* x y) '(1 2 3 4 5 6 7 8 9))))))
 
-(defun num-in-cell-p (num row line)
-  (if (eql (aref *sudoku* row line) num)
+(defun num-in-cell-p (num col line)
+  (if (eql (aref *sudoku* col line) num)
       t
       nil))
 
 (defun num-in-line (num line)
   (position-of-num num 0 line 'line))
 
-(defun num-in-row (num row)
-  (position-of-num num row 0 'row))
+(defun num-in-col (num col)
+  (position-of-num num col 0 'col))
 
-(defun position-of-num (num row line dir)
-  (if (or (> row (- *size* 1)) (> line (- *size* 1)))
+(defun position-of-num (num col line dir)
+  (if (or (> col (- *size* 1)) (> line (- *size* 1)))
       nil
-      (if (num-in-cell-p num row line)
-	  (cond ((eql dir 'line) row)
-		((eql dir 'row) line))
+      (if (num-in-cell-p num col line)
+	  (cond ((eql dir 'line) col)
+		((eql dir 'col) line))
 	  (cond ((eql dir 'line)
-		 (position-of-num num (1+ row) line dir))
-		((eql dir 'row)
-		 (position-of-num num row (1+ line) dir))))))
+		 (position-of-num num (1+ col) line dir))
+		((eql dir 'col)
+		 (position-of-num num col (1+ line) dir))))))
 
+(defun remove-possibilities (x y)
+  (let ((num (aref *sudoku* x y)))
+    (remove-possibilities-in-line num y)
+    (remove-possibilities-in-col num x)
+    (remove-possibilities-in-square num x y)))
+
+(defun remove-possibilities-in-line (num line)
+  (dotimes (y *size*)
+    (when (listp (aref *sudoku* line y))
+      (setf (aref *sudoku* line y) (remove num (aref *sudoku* line y))))))
+
+(defun remove-possibilities-in-col (num col)
+  (dotimes (x *size*)
+    (when (listp (aref *sudoku* x col))
+      (setf (aref *sudoku* x col) (remove num (aref *sudoku* x col))))))
+
+(defun remove-possibilities-in-square (num col line)
+  (let ((square-x (truncate (/ col *square-size*)))
+	(square-y (truncate (/ line *square-size*))))
+    (dotimes (x *square-size*)
+      (dotimes (y *square-size*)
+	(when (listp (aref *sudoku*
+			   (+ x (* square-x *square-size*))
+			   (+ y (* square-y *square-size*))))
+	  (setf (aref *sudoku*
+		      (+ x (* square-x *square-size*))
+		      (+ y (* square-y *square-size*)))
+		(remove num (aref *sudoku*
+				  (+ x (* square-x *square-size*))
+				  (+ y (* square-y *square-size*))))))))))
+
+(defun init-possibilities ()
+  (dotimes (x *size*)
+    (dotimes (y *size*)
+      (when (numberp (aref *sudoku* x y))
+	(remove-possibilities x y)))))
       
 
