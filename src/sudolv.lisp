@@ -33,8 +33,16 @@
   (dotimes (x *size*)
     (dotimes (y *size*)
       (when (null (aref *sudoku* x y))
-	(setf (aref *sudoku* x y) '(1 2 3 4 5 6 7 8 9))))))
+	(setf (aref *sudoku* x y) (list-numbers *size*))))))
 
+(defun list-numbers (num)
+  (list-numbers* num nil))
+
+(defun list-numbers* (num numlist)
+  (if (> num 0)
+      (list-numbers* (- num 1) (cons num numlist))
+      numlist))
+  
 (defun num-in-cell-p (num col line)
   (if (eql (aref *sudoku* col line) num)
       t
