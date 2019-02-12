@@ -1,10 +1,28 @@
-(defun test-sudoku ()
+(defun solve-sudoku ()
+  (progn
+    (init-sudoku-with-prompt)
+    (solver)))
+
+(defun solve-sudoku-file (file-name)
+  (progn
+    (init-sudoku-with-file file-name)
+    (solver)))
+
+(defun init-sudoku-with-prompt ()
   (let* ((file-name (prompt-read))
 	 (file-content (read-sudoku file-name)))
       (make-sudoku-array file-content)
       (replace-nils)
-      (init-possibilities)
-      *sudoku*))
+      (init-possibilities)))
+
+(defun init-sudoku-with-file (file-name)
+  (let ((file-content (read-sudoku file-name)))
+      (make-sudoku-array file-content)
+      (replace-nils)
+      (init-possibilities)))
+
+(defun solver ()
+  *sudoku*)
 
 (defparameter *sudoku* nil "Sudoku array to work with")
 (defparameter *size* 0 "size of Sudoku")
