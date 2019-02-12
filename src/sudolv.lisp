@@ -46,6 +46,11 @@
 	  (make-array (list size size)
 		      :initial-contents sudoku-list))))
 
+(defmacro every-cell (max-index &body body)
+  `(dotimes (x ,max-index)
+    (dotimes (y ,max-index)
+       ,@body)))
+
 (defun replace-nils ()
   (every-cell *size*
     (when (null (aref *sudoku* x y))
@@ -59,28 +64,6 @@
       (list-numbers* (- num 1) (cons num numlist))
       numlist))
   
-(defun num-in-cell-p (num col line)
-  (if (eql (aref *sudoku* col line) num)
-      t
-      nil))
-
-(defun num-in-line (num line)
-  (position-of-num num 0 line 'line))
-
-(defun num-in-col (num col)
-  (position-of-num num col 0 'col))
-
-(defun position-of-num (num col line dir)
-  (if (or (> col (- *size* 1)) (> line (- *size* 1)))
-      nil
-      (if (num-in-cell-p num col line)
-	  (cond ((eql dir 'line) col)
-		((eql dir 'col) line))
-	  (cond ((eql dir 'line)
-		 (position-of-num num (1+ col) line dir))
-		((eql dir 'col)
-		 (position-of-num num col (1+ line) dir))))))
-
 (defun remove-possibilities (x y)
   (let ((num (aref *sudoku* x y)))
     (remove-possibilities-in-line num y)
@@ -116,8 +99,29 @@
     (when (numberp (aref *sudoku* x y))
       (remove-possibilities x y))))
       
-(defmacro every-cell (max-index &body body)
-  `(dotimes (x ,max-index)
-    (dotimes (y ,max-index)
-       ,@body)))
+
+
+
+(defun num-in-cell-p (num col line)
+  (if (eql (aref *sudoku* col line) num)
+      t
+      nil))
+
+(defun num-in-line (num line)
+  (position-of-num num 0 line 'line))
+
+(defun num-in-col (num col)
+  (position-of-num num col 0 'col))
+
+(defun position-of-num (num col line dir)
+  (if (or (> col (- *size* 1)) (> line (- *size* 1)))
+      nil
+      (if (num-in-cell-p num col line)
+	  (cond ((eql dir 'line) col)
+		((eql dir 'col) line))
+	  (cond ((eql dir 'line)
+		 (position-of-num num (1+ col) line dir))
+		((eql dir 'col)
+		 (position-of-num num col (1+ line) dir))))))
+
 
