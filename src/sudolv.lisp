@@ -47,10 +47,9 @@
 		      :initial-contents sudoku-list))))
 
 (defun replace-nils ()
-  (dotimes (x *size*)
-    (dotimes (y *size*)
-      (when (null (aref *sudoku* x y))
-	(setf (aref *sudoku* x y) (list-numbers *size*))))))
+  (every-cell *size*
+    (when (null (aref *sudoku* x y))
+      (setf (aref *sudoku* x y) (list-numbers *size*)))))
 
 (defun list-numbers (num)
   (list-numbers* num nil))
@@ -101,22 +100,24 @@
 (defun remove-possibilities-in-square (num col line)
   (let ((square-x (truncate (/ col *square-size*)))
 	(square-y (truncate (/ line *square-size*))))
-    (dotimes (x *square-size*)
-      (dotimes (y *square-size*)
-	(when (listp (aref *sudoku*
-			   (+ x (* square-x *square-size*))
-			   (+ y (* square-y *square-size*))))
-	  (setf (aref *sudoku*
-		      (+ x (* square-x *square-size*))
-		      (+ y (* square-y *square-size*)))
-		(remove num (aref *sudoku*
-				  (+ x (* square-x *square-size*))
-				  (+ y (* square-y *square-size*))))))))))
+    (every-cell *square-size*
+      (when (listp (aref *sudoku*
+			 (+ x (* square-x *square-size*))
+			 (+ y (* square-y *square-size*))))
+	(setf (aref *sudoku*
+		    (+ x (* square-x *square-size*))
+		    (+ y (* square-y *square-size*)))
+	      (remove num (aref *sudoku*
+				(+ x (* square-x *square-size*))
+				(+ y (* square-y *square-size*)))))))))
 
 (defun init-possibilities ()
-  (dotimes (x *size*)
-    (dotimes (y *size*)
-      (when (numberp (aref *sudoku* x y))
-	(remove-possibilities x y)))))
+  (every-cell *size*
+    (when (numberp (aref *sudoku* x y))
+      (remove-possibilities x y))))
       
+(defmacro every-cell (max-index &body body)
+  `(dotimes (x ,max-index)
+    (dotimes (y ,max-index)
+       ,@body)))
 
