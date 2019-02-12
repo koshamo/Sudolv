@@ -88,14 +88,14 @@
     (remove-possibilities-in-square num x y)))
 
 (defun remove-possibilities-in-line (num line)
-  (dotimes (y *size*)
-    (when (listp (aref *sudoku* line y))
-      (setf (aref *sudoku* line y) (remove num (aref *sudoku* line y))))))
+  (dotimes (x *size*)
+    (when (listp (aref *sudoku* x line))
+      (setf (aref *sudoku* x line) (remove num (aref *sudoku* x line))))))
 
 (defun remove-possibilities-in-col (num col)
-  (dotimes (x *size*)
-    (when (listp (aref *sudoku* x col))
-      (setf (aref *sudoku* x col) (remove num (aref *sudoku* x col))))))
+  (dotimes (y *size*)
+    (when (listp (aref *sudoku* col y))
+      (setf (aref *sudoku* col y) (remove num (aref *sudoku* col y))))))
 
 (defun remove-possibilities-in-square (num col line)
   (let ((square-x (truncate (/ col *square-size*)))
