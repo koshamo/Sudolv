@@ -1,11 +1,10 @@
 (defun test-sudoku ()
   (let* ((file-name (prompt-read))
 	 (file-content (read-sudoku file-name)))
-    (progn
       (make-sudoku-array file-content)
       (replace-nils)
       (init-possibilities)
-      *sudoku*)))
+      *sudoku*))
 
 (defparameter *sudoku* nil "Sudoku array to work with")
 (defparameter *size* 0 "size of Sudoku")
