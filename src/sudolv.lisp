@@ -22,7 +22,9 @@
       (init-possibilities)))
 
 (defun solver ()
-  *sudoku*)
+  (do ((changed t))
+      ((null changed))
+    (setf changed (single-value-solver))))
 
 (defparameter *sudoku* nil "Sudoku array to work with")
 (defparameter *size* 0 "size of Sudoku")
@@ -99,6 +101,15 @@
     (when (numberp (aref *sudoku* x y))
       (remove-possibilities x y))))
       
+(defun single-value-solver ()
+  (let ((changed nil))
+    (every-cell *size*
+      (when (and (listp (aref *sudoku* x y)) (eql (length (aref *sudoku* x y)) 1))
+	(setf (aref *sudoku* x y) (car (aref *sudoku* x y)))
+	(remove-possibilities x y)
+	(setf changed t)))
+    changed))
+
 
 
 
