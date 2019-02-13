@@ -23,14 +23,19 @@
 
 (defun solver ()
   (progn
-    (do ((changed t))
-	((null changed))
-      (setf changed (single-value-solver)))
-    (sudoku-solved-p)))
+    (single-value-solver-loop)
+    (unless (sudoku-solved-p)
+      (when (single-position-solver)
+	(single-value-solver-loop)))
+    (print-sudoku)))
+	
 
 (defparameter *sudoku* nil "Sudoku array to work with")
 (defparameter *size* 0 "size of Sudoku")
 (defparameter *square-size* 0 "dimension of subsquare")
+
+(defun print-sudoku ()
+  *sudoku*)
 
 (defun prompt-read ()
   (format *query-io* "sudoku file (full path) : ")
@@ -110,7 +115,12 @@
 	(setf solved nil)
 	(return)))
     solved))
-    
+
+(defun single-value-solver-loop ()
+  (do ((changed t))
+      ((null changed))
+    (setf changed (single-value-solver))))
+
 (defun single-value-solver ()
   (let ((changed nil))
     (every-cell *size*
