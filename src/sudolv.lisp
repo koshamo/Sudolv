@@ -61,11 +61,11 @@
       (setf (aref *sudoku* x y) (list-numbers *size*)))))
 
 (defun list-numbers (num)
-  (list-numbers* num nil))
+  (list-numbers' num nil))
 
-(defun list-numbers* (num numlist)
+(defun list-numbers' (num numlist)
   (if (> num 0)
-      (list-numbers* (- num 1) (cons num numlist))
+      (list-numbers' (- num 1) (cons num numlist))
       numlist))
   
 (defun remove-possibilities (x y)
