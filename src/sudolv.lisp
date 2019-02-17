@@ -22,12 +22,14 @@
       (init-possibilities)))
 
 (defun solver ()
-  (progn
+  (do ((has-changed t))
+      ((not (and has-changed
+		 (not (sudoku-solved-p)))))
+    (setf has-changed nil)
     (single-value-solver-loop)
     (unless (sudoku-solved-p)
-      (when (single-position-solver)
-	(single-value-solver-loop)))
-    (print-sudoku)))
+      (setf has-changed (single-position-solver))))
+  (print-sudoku))
 	
 
 (defparameter *sudoku* nil "Sudoku array to work with")
