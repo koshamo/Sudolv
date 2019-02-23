@@ -216,17 +216,18 @@
   (every-cell *square-size*
     (let ((offset-x (* x *square-size*))
 	  (offset-y (* y *square-size*)))
-      (reduce-possibilities offset-x offset-y))))
+      (analyze-and-reduce-possibilities offset-x offset-y))))
 
-(defun reduce-possibilities (offset-x offset-y)
+(defun analyze-and-reduce-possibilities (offset-x offset-y)
   (dolist (num (list-numbers *size*))
     (let ((places nil))
       (every-cell *square-size*
 	(when (listp (aref *sudoku* (+ y offset-y) (+ x offset-x)))
 	  (when (member num (aref *sudoku* (+ y offset-y) (+ x offset-x)))
 	    (setf places (cons (list x y) places)))))
-      (format t "~a~%" (analyze-places places nil))
-      )))
+      (let ((reduction (analyze-places places nil)))
+	(unless (null reduction)
+	  (reduce-possibilities num reduction offset-x offset-y))))))
 
 (defun analyze-places (places coord)
   (if (null places)
@@ -239,6 +240,28 @@
 		 (analyze-places (cdr places) (list 'x (cadr coord))))
 		(t nil)))))
 
+(defun reduce-possibilities (num reduction offset-x offset-y)
+  (cond ((symbolp (car reduction))
+	 (reduce-in-line num (+ (cadr reduction) offset-y) offset-x))
+	((symbolp (cadr reduction))
+	 (reduce-in-row num (+ (car reduction) offset-x) offset-y))
+	(t nil)))
+
+(defun reduce-in-line (num line offset-x)
+  (let ((no-gos
+	 (mapcar #'(lambda (n) (+ n offset-x)) (mapcar #'1- (list-numbers *square-size*)))))
+    (dotimes (x *size*)
+      (unless (member x no-gos)
+	(when (listp (aref *sudoku* line x))
+	  (setf (aref *sudoku* line x) (remove num (aref *sudoku* line x))))))))
+
+(defun reduce-in-row (num col offset-y)
+  (let ((no-gos
+	 (mapcar #'(lambda (n) (+ n offset-y)) (mapcar #'1- (list-numbers *square-size*)))))
+    (dotimes (y *size*)
+      (unless (member y no-gos)
+	(when (listp (aref *sudoku* y col))
+	  (setf (aref *sudoku* y col) (remove num (aref *sudoku* y col))))))))
 
 
     
