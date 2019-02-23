@@ -212,6 +212,36 @@
 	pos
 	nil)))
 
+(defun possibility-reduction-solver ()
+  (every-cell *square-size*
+    (let ((offset-x (* x *square-size*))
+	  (offset-y (* y *square-size*)))
+      (reduce-possibilities offset-x offset-y))))
+
+(defun reduce-possibilities (offset-x offset-y)
+  (dolist (num (list-numbers *size*))
+    (let ((places nil))
+      (every-cell *square-size*
+	(when (listp (aref *sudoku* (+ y offset-y) (+ x offset-x)))
+	  (when (member num (aref *sudoku* (+ y offset-y) (+ x offset-x)))
+	    (setf places (cons (list x y) places)))))
+      (format t "~a~%" (analyze-places places nil))
+      )))
+
+(defun analyze-places (places coord)
+  (if (null places)
+      coord
+      (if (null coord)
+	  (analyze-places (cdr places) (car places))
+	  (cond ((eql (caar places) (car coord))
+		 (analyze-places (cdr places) (list (car coord) 'y)))
+		((eql (cadar places) (cadr coord))
+		 (analyze-places (cdr places) (list 'x (cadr coord))))
+		(t nil)))))
+
+
+
+    
 
 (defun num-in-cell-p (num col line)
   (eql (aref *sudoku* line col) num))
