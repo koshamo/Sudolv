@@ -6,7 +6,7 @@ The sudoku solver is currently tested using 9x9 sudokus only. But in general it 
 
 ## Usage
 
-After loading Sudolv to a Common Lisp REPL you may start the sudoku solver either using the function (solve-sudoku), which then prompts for a sudoku file of (solve-sudoku-file file-name), where file-name is a string containing the path to a sudoku file.
+After loading Sudolv to a Common Lisp REPL you may start the sudoku solver either using the function (solve-sudoku), which then prompts for a sudoku file or (solve-sudoku-file file-name), where file-name is a string containing the path to a sudoku file.
 
 ## Sudoku file
 
