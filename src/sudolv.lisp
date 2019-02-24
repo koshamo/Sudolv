@@ -28,7 +28,9 @@
     (setf has-changed nil)
     (single-value-solver-loop)
     (unless (sudoku-solved-p)
-      (setf has-changed (single-position-solver))))
+      (setf has-changed (single-position-solver)))
+    (unless (or has-changed (sudoku-solved-p))
+      (setf has-changed (possibility-reduction-solver))))
   (print-sudoku))
 	
 
@@ -216,7 +218,8 @@
   (every-cell *square-size*
     (let ((offset-x (* x *square-size*))
 	  (offset-y (* y *square-size*)))
-      (analyze-and-reduce-possibilities offset-x offset-y))))
+      (analyze-and-reduce-possibilities offset-x offset-y)))
+  t)
 
 (defun analyze-and-reduce-possibilities (offset-x offset-y)
   (dolist (num (list-numbers *size*))
@@ -248,7 +251,8 @@
 	(t nil)))
 
 (defun reduce-in-line (num line offset-x)
-  (let ((no-gos
+  (let ((changed nil)
+	(no-gos
 	 (mapcar #'(lambda (n) (+ n offset-x)) (mapcar #'1- (list-numbers *square-size*)))))
     (dotimes (x *size*)
       (unless (member x no-gos)
