@@ -251,8 +251,7 @@
 	(t nil)))
 
 (defun reduce-in-line (num line offset-x)
-  (let ((changed nil)
-	(no-gos
+  (let ((no-gos
 	 (mapcar #'(lambda (n) (+ n offset-x)) (mapcar #'1- (list-numbers *square-size*)))))
     (dotimes (x *size*)
       (unless (member x no-gos)
@@ -266,28 +265,5 @@
       (unless (member y no-gos)
 	(when (listp (aref *sudoku* y col))
 	  (setf (aref *sudoku* y col) (remove num (aref *sudoku* y col))))))))
-
-
-    
-
-(defun num-in-cell-p (num col line)
-  (eql (aref *sudoku* line col) num))
-
-(defun num-in-line (num line)
-  (position-of-num num 0 line 'line))
-
-(defun num-in-col (num col)
-  (position-of-num num col 0 'col))
-
-(defun position-of-num (num col line dir)
-  (if (or (> col (- *size* 1)) (> line (- *size* 1)))
-      nil
-      (if (num-in-cell-p num col line)
-	  (cond ((eql dir 'line) col)
-		((eql dir 'col) line))
-	  (cond ((eql dir 'line)
-		 (position-of-num num (1+ col) line dir))
-		((eql dir 'col)
-		 (position-of-num num col (1+ line) dir))))))
 
 
