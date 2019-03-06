@@ -65,7 +65,7 @@ reductions can be done, more complex solvers are included to solve the sudoku"
 	  (make-array (list size size)
 		      :initial-contents sudoku-list))))
 
-(defmacro every-cell (max-index &body body)
+(defmacro each-cell (max-index &body body)
   "this macro simplifies looping over all cells of the 2-dimensional array.
 It gives access to the coordinates with the symbols X and Y"
   `(dotimes (x ,max-index)
@@ -75,7 +75,7 @@ It gives access to the coordinates with the symbols X and Y"
 (defun replace-nils ()
   "replaces all nils from an initial sudoku file with a list of possibilities for this cell.
 Note: there is not yet any reduction of possibilities, it's just the full set of numbers."
-  (every-cell *size*
+  (each-cell *size*
     (when (null (aref *sudoku* y x))
       (setf (aref *sudoku* y x) (list-numbers *size*)))))
 
@@ -112,7 +112,7 @@ Note: there is not yet any reduction of possibilities, it's just the full set of
   "remove all possibilities for a given number in its square"
   (let ((square-x (truncate (/ col *square-size*)))
 	(square-y (truncate (/ line *square-size*))))
-    (every-cell *square-size*
+    (each-cell *square-size*
       (when (listp (aref *sudoku*
 			 (+ y (* square-y *square-size*))
 			 (+ x (* square-x *square-size*))))
@@ -125,14 +125,14 @@ Note: there is not yet any reduction of possibilities, it's just the full set of
 
 (defun init-possibilities ()
   "remove obsolete possibilities in a freshly initialized array with new possibility lists"
-  (every-cell *size*
+  (each-cell *size*
     (when (numberp (aref *sudoku* y x))
       (remove-possibilities x y))))
 
 (defun sudoku-solved-p ()
   "check whether the sudokuo is already solved"
   (let ((solved t))
-    (every-cell *size*
+    (each-cell *size*
       (when (listp (aref *sudoku* y x))
 	(setf solved nil)
 	(return)))
@@ -147,7 +147,7 @@ Note: there is not yet any reduction of possibilities, it's just the full set of
 (defun single-value-solver ()
   "basic solver: checks all cells, if there is only one possibility left in the possibility list. If so, replaces that one possibility with that number and cares for the removal of that number out of the corresponding possibility lists"
   (let ((changed nil))
-    (every-cell *size*
+    (each-cell *size*
       (when (and (listp (aref *sudoku* y x)) (eql (length (aref *sudoku* y x)) 1))
 	(setf (aref *sudoku* y x) (car (aref *sudoku* y x)))
 	(remove-possibilities x y)
@@ -245,7 +245,7 @@ Note: there is not yet any reduction of possibilities, it's just the full set of
 
 (defun possibility-reduction-solver ()
   "complex solver: checks the remaining possibilities per square. If a number can only be placed in a single line / column, this possibility can be removed in that same line / column in all other squares"
-  (every-cell *square-size*
+  (each-cell *square-size*
     (let ((offset-x (* x *square-size*))
 	  (offset-y (* y *square-size*)))
       (analyze-and-reduce-possibilities offset-x offset-y)))
@@ -255,7 +255,7 @@ Note: there is not yet any reduction of possibilities, it's just the full set of
   "this function collects all possible positions of a number within one square. It then calls to analyze the positions and to possibly remove possibilities based on the analyzation"
   (dolist (num (list-numbers *size*))
     (let ((places nil))
-      (every-cell *square-size*
+      (each-cell *square-size*
 	(when (listp (aref *sudoku* (+ y offset-y) (+ x offset-x)))
 	  (when (member num (aref *sudoku* (+ y offset-y) (+ x offset-x)))
 	    (setf places (cons (list x y) places)))))
