@@ -72,6 +72,10 @@ It gives access to the coordinates with the symbols X and Y"
     (dotimes (y ,max-index)
        ,@body)))
 
+(defun is-list-p (y x)
+  "checks a *sudoku* cell for being a list"
+  (listp (aref *sudoku* y x)))
+
 (defun replace-nils ()
   "replaces all nils from an initial sudoku file with a list of possibilities for this cell.
 Note: there is not yet any reduction of possibilities, it's just the full set of numbers."
@@ -99,13 +103,13 @@ Note: there is not yet any reduction of possibilities, it's just the full set of
 (defun remove-possibilities-in-line (num line)
   "remove all possibilities for a given number in a given line"
   (dotimes (x *size*)
-    (when (listp (aref *sudoku* line x))
+    (when (is-list-p line x)
       (setf (aref *sudoku* line x) (remove num (aref *sudoku* line x))))))
 
 (defun remove-possibilities-in-col (num col)
   "remove all possibilities for a given number in a given column"
   (dotimes (y *size*)
-    (when (listp (aref *sudoku* y col))
+    (when (is-list-p y col)
       (setf (aref *sudoku* y col) (remove num (aref *sudoku* y col))))))
 
 (defun remove-possibilities-in-square (num col line)
@@ -113,9 +117,8 @@ Note: there is not yet any reduction of possibilities, it's just the full set of
   (let ((square-x (truncate (/ col *square-size*)))
 	(square-y (truncate (/ line *square-size*))))
     (each-cell *square-size*
-      (when (listp (aref *sudoku*
-			 (+ y (* square-y *square-size*))
-			 (+ x (* square-x *square-size*))))
+      (when (is-list-p (+ y (* square-y *square-size*))
+		       (+ x (* square-x *square-size*)))
 	(setf (aref *sudoku*
 		    (+ y (* square-y *square-size*))
 		    (+ x (* square-x *square-size*)))
@@ -133,7 +136,7 @@ Note: there is not yet any reduction of possibilities, it's just the full set of
   "check whether the sudokuo is already solved"
   (let ((solved t))
     (each-cell *size*
-      (when (listp (aref *sudoku* y x))
+      (when (is-list-p y x)
 	(setf solved nil)
 	(return)))
     solved))
@@ -148,7 +151,7 @@ Note: there is not yet any reduction of possibilities, it's just the full set of
   "basic solver: checks all cells, if there is only one possibility left in the possibility list. If so, replaces that one possibility with that number and cares for the removal of that number out of the corresponding possibility lists"
   (let ((changed nil))
     (each-cell *size*
-      (when (and (listp (aref *sudoku* y x)) (eql (length (aref *sudoku* y x)) 1))
+      (when (and (is-list-p y x) (eql (length (aref *sudoku* y x)) 1))
 	(setf (aref *sudoku* y x) (car (aref *sudoku* y x)))
 	(remove-possibilities x y)
 	(setf changed t)))
@@ -180,7 +183,7 @@ Note: there is not yet any reduction of possibilities, it's just the full set of
     (dolist (num (list-numbers *size*))
       (let ((cnt 0))
 	(dotimes (x *size*)
-	  (when (listp (aref *sudoku* line x))
+	  (when (is-list-p line x)
 	    (when (member num (aref *sudoku* line x))
 	      (incf cnt))))
 	(when (= cnt 1)
@@ -203,7 +206,7 @@ Note: there is not yet any reduction of possibilities, it's just the full set of
     (dolist (num (list-numbers *size*))
       (let ((cnt 0))
 	(dotimes (y *size*)
-	  (when (listp (aref *sudoku* y col))
+	  (when (is-list-p y col)
 	    (when (member num (aref *sudoku* y col))
 	      (incf cnt))))
 	(when (= cnt 1)
@@ -223,7 +226,7 @@ Note: there is not yet any reduction of possibilities, it's just the full set of
   "helper function to find the first occurance of a number as possibility in a line"
   (let ((pos -1))
     (dotimes (x *size*)
-      (when (listp (aref *sudoku* line x))
+      (when (is-list-p line x)
 	(when (member num (aref *sudoku* line x))
 	  (setf pos x)
 	  (return))))
@@ -235,7 +238,7 @@ Note: there is not yet any reduction of possibilities, it's just the full set of
   "helper function to find the first occurance of a number as possibility in a column"
   (let ((pos -1))
     (dotimes (y *size*)
-      (when (listp (aref *sudoku* y col))
+      (when (is-list-p y col)
 	(when (member num (aref *sudoku* y col))
 	  (setf pos y)
 	  (return))))
@@ -256,7 +259,7 @@ Note: there is not yet any reduction of possibilities, it's just the full set of
   (dolist (num (list-numbers *size*))
     (let ((places nil))
       (each-cell *square-size*
-	(when (listp (aref *sudoku* (+ y offset-y) (+ x offset-x)))
+	(when (is-list-p (+ y offset-y) (+ x offset-x))
 	  (when (member num (aref *sudoku* (+ y offset-y) (+ x offset-x)))
 	    (setf places (cons (list x y) places)))))
       (let ((reduction (analyze-places places nil)))
@@ -289,7 +292,7 @@ Note: there is not yet any reduction of possibilities, it's just the full set of
 	 (mapcar #'(lambda (n) (+ n offset-x)) (mapcar #'1- (list-numbers *square-size*)))))
     (dotimes (x *size*)
       (unless (member x no-gos)
-	(when (listp (aref *sudoku* line x))
+	(when (is-list-p line x)
 	  (setf (aref *sudoku* line x) (remove num (aref *sudoku* line x))))))))
 
 (defun reduce-in-row (num col offset-y)
@@ -298,7 +301,7 @@ Note: there is not yet any reduction of possibilities, it's just the full set of
 	 (mapcar #'(lambda (n) (+ n offset-y)) (mapcar #'1- (list-numbers *square-size*)))))
     (dotimes (y *size*)
       (unless (member y no-gos)
-	(when (listp (aref *sudoku* y col))
+	(when (is-list-p y col)
 	  (setf (aref *sudoku* y col) (remove num (aref *sudoku* y col))))))))
 
 
