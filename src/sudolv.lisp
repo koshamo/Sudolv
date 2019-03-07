@@ -76,6 +76,10 @@ It gives access to the coordinates with the symbols X and Y"
   "checks a *sudoku* cell for being a list"
   (listp (aref *sudoku* y x)))
 
+(defun is-member-p (num y x)
+  "checks if num is member of list in *sudoko* at position y and x"
+  (member num (aref *sudoku* y x)))
+
 (defun replace-nils ()
   "replaces all nils from an initial sudoku file with a list of possibilities for this cell.
 Note: there is not yet any reduction of possibilities, it's just the full set of numbers."
@@ -184,7 +188,7 @@ Note: there is not yet any reduction of possibilities, it's just the full set of
       (let ((cnt 0))
 	(dotimes (x *size*)
 	  (when (is-list-p line x)
-	    (when (member num (aref *sudoku* line x))
+	    (when (is-member-p num line x)
 	      (incf cnt))))
 	(when (= cnt 1)
 	  (let ((x (first-possibility-in-line num line)))
@@ -207,7 +211,7 @@ Note: there is not yet any reduction of possibilities, it's just the full set of
       (let ((cnt 0))
 	(dotimes (y *size*)
 	  (when (is-list-p y col)
-	    (when (member num (aref *sudoku* y col))
+	    (when (is-member-p num y col)
 	      (incf cnt))))
 	(when (= cnt 1)
 	  (let ((y (first-possibility-in-col num col)))
@@ -227,7 +231,7 @@ Note: there is not yet any reduction of possibilities, it's just the full set of
   (let ((pos -1))
     (dotimes (x *size*)
       (when (is-list-p line x)
-	(when (member num (aref *sudoku* line x))
+	(when (is-member-p num line x)
 	  (setf pos x)
 	  (return))))
     (if (not (eql pos -1))
@@ -239,7 +243,7 @@ Note: there is not yet any reduction of possibilities, it's just the full set of
   (let ((pos -1))
     (dotimes (y *size*)
       (when (is-list-p y col)
-	(when (member num (aref *sudoku* y col))
+	(when (is-member-p num y col)
 	  (setf pos y)
 	  (return))))
     (if (not (eql pos -1))
@@ -260,7 +264,7 @@ Note: there is not yet any reduction of possibilities, it's just the full set of
     (let ((places nil))
       (each-cell *square-size*
 	(when (is-list-p (+ y offset-y) (+ x offset-x))
-	  (when (member num (aref *sudoku* (+ y offset-y) (+ x offset-x)))
+	  (when (is-member-p num (+ y offset-y) (+ x offset-x))
 	    (setf places (cons (list x y) places)))))
       (let ((reduction (analyze-places places nil)))
 	(unless (null reduction)
